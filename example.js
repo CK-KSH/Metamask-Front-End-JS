@@ -220,3 +220,119 @@ window.addEventListener('load', async () => {
   document.querySelector("#btn-connect").addEventListener("click", onConnect);
   document.querySelector("#btn-disconnect").addEventListener("click", onDisconnect);
 });
+
+
+//***************************************************************************
+// From here, my added codes:
+function getERC20TokenBalance(tokenAddress, walletAddress, callback) {
+  
+        // ERC20 トークンの残高を取得するための最小限のABI
+        /*let minABI = [
+          // balanceOf
+          {
+            "constant":true,
+            "inputs":[{"name":"_owner","type":"address"}],
+            "name":"balanceOf",
+            "outputs":[{"name":"balance","type":"uint256"}],
+            "type":"function"
+          },
+          // decimals
+          {
+            "constant":true,
+            "inputs":[],
+            "name":"decimals",
+            "outputs":[{"name":"","type":"uint8"}],
+            "type":"function"
+          }
+        ]; */
+  
+        let min_myABI = [
+        // balanceOf
+        {
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "account",
+				"type": "address"
+			}
+		],
+		"name": "balanceOf",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+
+        // decimals
+        {
+		"inputs": [],
+		"name": "decimals",
+		"outputs": [
+			{
+				"internalType": "uint8",
+				"name": "",
+				"type": "uint8"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+
+    ]  
+
+
+        //  ABI とコントラクト（ERC20トークン）のアドレスから、コントラクトのインスタンスを取得 
+        // let contract = web3.eth.contract(minABI).at(tokenAddress);
+        let contract = web3.eth.contract(min_myABI).at(tokenAddress);        
+        // 引数にウォレットのアドレスを渡して、balanceOf 関数を呼ぶ
+        contract.balanceOf(walletAddress, (error, balance) => {
+          // ERC20トークンの decimals を取得
+          contract.decimals((error, decimals) => {
+            // 残高を計算
+            balance = balance.div(10**decimals);
+            console.log(balance.toString());
+            callback(balance);
+          });
+        });
+      }
+  
+/*      function onAddressChange(e) {
+        let tokenAddress = document.getElementById('token-address').value;
+        let walletAddress = document.getElementById('wallet-address').value;
+        if(tokenAddress != "" && walletAddress != "") {
+          getERC20TokenBalance(tokenAddress, walletAddress, (balance) => {
+            document.getElementById('result').innerText = balance.toString();
+          });        
+        }
+      } */
+
+      function getTokenBal() {
+      //  let tokenAddress = document.getElementById('token-address').value;
+      //  let walletAddress = document.getElementById('wallet-address').value;
+          let tokenAddress = "0x957aa185B7fe9fc4b156ead35cC3284318204EEb";
+          let walletAddress = "0x0d24C98Dd995651F51AC39757DC401eF8b6131fb";
+          
+          if(tokenAddress != "" && walletAddress != "") {
+            getERC20TokenBalance(tokenAddress, walletAddress, (balance) => {
+              document.getElementById('demo').innerText = balance.toString();
+          });        
+        }
+      }
+
+  
+      window.onload = function() {
+        if (typeof web3 !== 'undefined') {
+          web3 = new Web3(web3.currentProvider);
+        } else {
+          web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io"));
+        }
+        console.log(web3.version);
+      }
+
+
+
